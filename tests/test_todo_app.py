@@ -72,4 +72,8 @@ class TestTodoApp:
         mvc_page.navigate()
         mvc_page.write_task(task="")
 
-        assert_that(mvc_page.get_task_names(), empty())
+        assert_that(
+            mvc_page.get_task_names(),
+            is_not(empty()),
+            reason="The task list can't be empty",
+        )

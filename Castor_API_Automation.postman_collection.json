@@ -1,0 +1,307 @@
+{
+	"info": {
+		"_postman_id": "cf94b7fa-d32a-4e56-8c0f-bc5c26b2b805",
+		"name": "Castor API Automation",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "36126898"
+	},
+	"item": [
+		{
+			"name": "Create task",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Create a random name\r",
+							"let randomString = `Random task ${(Math.random() + 1).toString(36).substring(2)}`;\r",
+							"\r",
+							"// Assign random name\r",
+							"pm.environment.set(\"taskName\", randomString)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"A new task created\", () => {\r",
+							"    let response = pm.response.json();\r",
+							"    let taskName = pm.environment.get(\"taskName\");\r",
+							"    \r",
+							"    // Validate status code\r",
+							"    pm.expect(pm.response.code).to.be.eql(201);\r",
+							"\r",
+							"    // Validate task name\r",
+							"    pm.expect(response.name).to.eql(taskName);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{taskName}}\",\r\n    \"status\": \"todo\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create empty task",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Create a random name\r",
+							"let randomString = `Random task ${(Math.random() + 1).toString(36).substring(2)}`;\r",
+							"\r",
+							"// Assign random name\r",
+							"pm.environment.set(\"taskName\", randomString)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"A new task created\", () => {\r",
+							"    let response = pm.response.json();\r",
+							"    let taskName = pm.environment.get(\"taskName\");\r",
+							"\r",
+							"    // Validate task name\r",
+							"    pm.expect(response.name,\"The name can't be empty\").to.eql(taskName);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get tasks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Get all tasks\", () => {\r",
+							"    let response = pm.response.json();\r",
+							"\r",
+							"    // Validate the status code\r",
+							"    pm.expect(pm.response.code).to.eql(200);\r",
+							"\r",
+							"    // Validate the response\r",
+							"    pm.expect(response).not.to.be.empty;\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/tasks",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update task",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/tasks\",\r",
+							"    method: \"GET\"\r",
+							"}, (err, res) => {\r",
+							"    let response = res.json()\r",
+							"\r",
+							"    // Create a new name for the task\r",
+							"    let randomString = `Random task ${(Math.random() + 1).toString(36).substring(2)}`;\r",
+							"    pm.environment.set(\"taskName\", randomString)\r",
+							"    \r",
+							"    // Get random task from response\r",
+							"    var item = response[Math.floor(Math.random() * response.length)];\r",
+							"\r",
+							"    // Set new values for variables\r",
+							"    pm.environment.set(\"taskId\", item.id)\r",
+							"    pm.environment.set(\"taskStatus\", !item.status)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate the updated task\", () => {\r",
+							"    let response = pm.response.json()\r",
+							"\r",
+							"    // Validate status code\r",
+							"    pm.expect(pm.response.code).to.eql(200);\r",
+							"    \r",
+							"    // Validate the updated information\r",
+							"    pm.expect(response.name).to.be.eql(pm.environment.get(\"taskName\"))\r",
+							"    pm.expect(response.id).to.be.eql(pm.environment.get(\"taskId\"))\r",
+							"    pm.expect(response.status).to.be.eql(pm.environment.get(\"taskStatus\"))\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"{{taskName}}\",\r\n    \"status\": {{taskStatus}}\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:3000/tasks/{{taskId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks",
+						"{{taskId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "New Request",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.sendRequest({\r",
+							"    url: \"http://localhost:3000/tasks\",\r",
+							"    method: \"GET\"\r",
+							"}, (err, res) => {\r",
+							"    let response = res.json()\r",
+							"\r",
+							"    // Get random task from response\r",
+							"    var item = response[Math.floor(Math.random() * response.length)];\r",
+							"\r",
+							"    // Set new values for variables\r",
+							"    pm.environment.set(\"taskId\", item.id)\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Validate deleted task\", () => {\r",
+							"    pm.sendRequest({\r",
+							"        url: \"http://localhost:3000/tasks\",\r",
+							"        method: \"GET\"\r",
+							"    }, (err, res) => {\r",
+							"        let tasksResponse = res.json();\r",
+							"        let response = pm.response.json();\r",
+							"\r",
+							"        // Check the deleted task in the tasks list\r",
+							"        let check = tasksResponse.some(item => item.id === response.id)\r",
+							"\r",
+							"        pm.expect(check).to.be.false\r",
+							"    })\r",
+							"\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/tasks/{{taskId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks",
+						"{{taskId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
